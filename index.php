@@ -14,7 +14,7 @@
             </tr>
             <tr>
                 <td>
-                    <select id="grades" multiple="multiple"></select>   
+                    <select id="grades" onchange= "FillSections()" multiple="multiple"></select>   
                 </td>
                 <td>
                     <select id ="sections" multiple="multiple"></select>
@@ -42,7 +42,7 @@
                 gradesArray = str.split("\t");
             }
         };
-        httpGrades.open("GET", "mysql/grades.php?", false);
+        httpGrades.open("GET", "mysql/grades.php", false);
         httpGrades.send();
             
         $('#grades').multiselect('destroy');
@@ -60,8 +60,29 @@
     </script>
     
    <script type="text/javascript">
+    document.getElementById("grades").addEventListener("change", FillSections());
+
+    function FillSections(){
         var sectionsArray = ["Your Data Base is Empty!."];
+        var selected_grades = $("#grades option:selected");
         var select = document.getElementById('sections');
+
+        while (select.length > 0)
+                    select.remove(0);    
+
+        var message = "";
+        selected_grades.each(function () {
+            if (message === "")
+                message = "(courses.course_name = '" + $(this).text() + "' ";
+            else
+                message += " OR courses.course_name = '" + $(this).text() + "' ";
+        });
+
+        if (message !== "") {
+            selected_grades = message + ")";
+        } else
+            selected_grades = "";
+
         var httpSections = new XMLHttpRequest();
         httpSections.onreadystatechange = function () {
             if (this.readyState === 4) {
@@ -69,10 +90,11 @@
                 sectionsArray = str.split("\t");
             }
         };
-        httpSections.open("GET", "mysql/sections.php?", false);
+        httpSections.open("GET", "mysql/sections.php?grades=" + selected_grades, false);
         httpSections.send();
             
         $('#sections').multiselect('destroy');
+
         delete sectionsArray[sectionsArray.length - 1];
 
         for (var i in sectionsArray) {
@@ -84,5 +106,6 @@
                 includeSelectAllOption: true
             });
         }); 
+    }
     </script>
 </body>
