@@ -5,6 +5,34 @@
     <title>Generate Credentials</title>
 </head>
 
+<script type="text/javascript">
+    function search() {
+        var selected_grades = $("#grades option:selected");
+        var selected_batches = $("#sections option:selected");
+
+        var message = "";
+        selected_grades.each(function () {
+            if (message === "")
+                message = "(courses.course_name = '" + $(this).text() + "' ";
+            else
+                message += " OR courses.course_name = '" + $(this).text() + "' ";
+        });
+
+        if (message !== "") {
+            selected_grades = message + ")";
+        } else
+            selected_grades = "";
+
+        var httpSections = new XMLHttpRequest();
+        httpSections.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                document.getElementById("list").innerHTML = this.responseText;
+            }
+        };
+        httpSections.open("GET", "mysql/search.php?grades=" + selected_grades, false);
+        httpSections.send();
+    }
+</script>
 <body>
     <div id="upperdiv" class="w3-container w3-mobile" style="padding-top: 10px; padding-bottom: 10px">
         <table id= "table1">
@@ -29,6 +57,10 @@
                 </td>
             </tr>
         </table>
+    </div>
+    <br>
+    <div><h1>Result</h1>
+        <table id="list"></table>
     </div>
 
     <!-- Fill Dropdowns -->
